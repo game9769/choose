@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蕾蕾的智能选择助手</title>
+    <title>蕾蕾选择器</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -24,7 +24,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
-            position: relative;
         }
         h1 {
             text-align: center;
@@ -153,6 +152,12 @@
             .dice-button {
                 flex: 1 1 calc(50% - 10px);
             }
+            h1 {
+                font-size: 1.75em;
+            }
+            .category-group-title {
+                font-size: 1.25em;
+            }
         }
         @media (max-width: 400px) {
             .option {
@@ -161,29 +166,19 @@
             .dice-button {
                 flex: 1 1 100%;
             }
-        }
-        .logo {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background-image: url('https://img.alicdn.com/tfs/TB1RJwKqNz1gK0jSZSgXXavwpXa-100-100.png'); /* Example image URL */
-            background-size: cover;
-            background-position: center;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .emoji {
-            font-size: 1.5em;
-            margin-left: 10px;
+            h1 {
+                font-size: 1.5em;
+            }
+            .category-group-title {
+                font-size: 1.1em;
+            }
         }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="container" id="categoryListContainer">
-            <h1>蕾蕾的智能选择助手 😊💕</h1>
+            <h1>蕾蕾选择器 😊💕</h1>
             <ul class="category-list" id="categoryList"></ul>
         </div>
 
@@ -195,7 +190,6 @@
             <div class="selected-option" id="selectedOptionDisplay"></div>
             <div class="result-container" id="resultContainer"></div>
         </div>
-        <div class="logo"></div>
     </div>
 
     <script>
