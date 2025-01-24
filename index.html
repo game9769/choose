@@ -24,11 +24,13 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+            position: relative;
         }
         h1 {
             text-align: center;
             color: #ff69b4;
             margin-bottom: 20px;
+            font-size: 2em;
         }
         .category-list {
             list-style-type: none;
@@ -47,11 +49,15 @@
             border: 1px solid #ffb6c1;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .category-item:hover {
-            background-color: #ffc0cb;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
         .options-container {
             display: flex;
@@ -66,7 +72,7 @@
             border: 1px solid #ffb6c1;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
             flex-basis: calc(33.33% - 10px); /* Three options per row */
             position: relative;
             display: flex;
@@ -74,7 +80,8 @@
             align-items: center;
         }
         .option:hover {
-            background-color: #ffc0cb;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
             border-color: #ff1493;
         }
         .buttons-container {
@@ -91,7 +98,7 @@
             cursor: pointer;
             font-size: 1em;
             color: white;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.3s;
             flex: 1 1 calc(33.33% - 10px);
             margin: 5px;
         }
@@ -101,12 +108,14 @@
         }
         .dice-button.disabled:hover {
             background-color: #ccc;
+            transform: none;
         }
         .selected-option {
             font-weight: bold;
             color: #ff69b4;
             margin-top: 10px;
             text-align: center;
+            font-size: 1.2em;
         }
         .result-container {
             margin-top: 10px;
@@ -132,6 +141,10 @@
             color: #ff69b4;
             font-size: 1em;
             cursor: pointer;
+            transition: color 0.3s;
+        }
+        .back-button:hover {
+            color: #ff1493;
         }
         @media (max-width: 600px) {
             .option {
@@ -149,45 +162,75 @@
                 flex: 1 1 100%;
             }
         }
+        .logo {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-image: url('https://img.alicdn.com/tfs/TB1RJwKqNz1gK0jSZSgXXavwpXa-100-100.png'); /* Example image URL */
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .emoji {
+            font-size: 1.5em;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="container" id="categoryListContainer">
-            <h1>蕾蕾的智能选择助手</h1>
+            <h1>蕾蕾的智能选择助手 😊💕</h1>
             <ul class="category-list" id="categoryList"></ul>
         </div>
 
         <div class="container" id="detailContainer" style="display: none;">
-            <button class="back-button" onclick="goBack()">返回</button>
+            <button class="back-button" onclick="goBack()">返回 🔄</button>
             <h1 id="categoryTitle"></h1>
             <div class="options-container" id="optionsContainer"></div>
             <div class="buttons-container" id="buttonsContainer"></div>
             <div class="selected-option" id="selectedOptionDisplay"></div>
             <div class="result-container" id="resultContainer"></div>
         </div>
+        <div class="logo"></div>
     </div>
 
     <script>
         const categoriesData = [
             {
+                group: "生活方式",
+                categories: [
+                    {
+                        title: '起床模式 🕒⏰',
+                        options: ["立刻起床", "再睡10分钟", "多睡半小时", "多睡1小时", "自然醒"]
+                    }
+                ]
+            },
+            {
                 group: "饮食",
                 categories: [
                     {
-                        title: '早餐选啥',
+                        title: '早餐 🍳🥐',
                         options: ["中式早餐", "西式早餐", "健康轻食", "快餐便饭", "营养全餐", "地方特色"]
                     },
                     {
-                        title: '零食吃啥',
-                        options: ["薯片饼干", "巧克力糖", "坚果果干", "冰淇淋", "酸奶", "辣条豆干"]
-                    },
-                    {
-                        title: '午餐安排',
+                        title: '午餐 🍽️🥗',
                         options: ["外卖", "便当", "食堂", "聚餐", "轻食", "快餐"]
                     },
                     {
-                        title: '晚餐外出',
-                        options: ["家常菜", "火锅", "异国料理", "夜市小吃", "轻食", "特色餐厅"]
+                        title: '零食 🍪🍫',
+                        options: ["水果", "薯片饼干", "巧克力糖", "坚果果干", "冰淇淋", "酸奶", "蛋糕", "辣条豆干"]
+                    },
+                    {
+                        title: '晚餐 🍽️🍲',
+                        options: ["外卖", "家常菜", "火锅", "异国料理", "夜市小吃", "轻食", "特色餐厅"]
+                    },
+                    {
+                        title: '晚餐餐厅 🍽️🏠',
+                        options: ["西餐厅", "小吃店", "网红店", "家庭餐馆", "江景餐厅", "烧烤摊"]
                     }
                 ]
             },
@@ -195,74 +238,17 @@
                 group: "娱乐",
                 categories: [
                     {
-                        title: '晚上干啥',
-                        options: ["看电影", "追剧", "玩游戏", "听音乐", "聚会", "夜游"]
+                        title: '晚上干嘛 🎥🍿',
+                        options: ["运动", "锻炼", "看电影", "追剧", "玩游戏", "听音乐", "追小说", "夜游"]
                     },
-                    {
-                        title: '兴趣爱好',
-                        options: ["涂鸦", "摄影", "手工艺", "乐器", "阅读", "户外"]
-                    }
-                ]
-            },
-            {
-                group: "生活方式",
-                categories: [
-                    {
-                        title: '起床模式',
-                        options: ["立刻起床", "再睡10分钟", "多睡半小时", "周末赖床", "智能唤醒", "自然醒"]
-                    },
-                    {
-                        title: '工作生活',
-                        options: ["高效工作", "周末放松", "健身", "兴趣", "家庭", "独处"]
-                    },
-                    {
-                        title: '学习休息',
-                        options: ["图书馆", "在线课", "晨读", "兴趣班", "睡前书", "适当休息"]
-                    }
-                ]
-            },
-            {
-                group: "购物",
-                categories: [
-                    {
-                        title: '购物选啥',
-                        options: ["服饰", "家居", "科技", "美妆", "运动", "儿童"]
-                    }
                 ]
             },
             {
                 group: "旅行",
                 categories: [
                     {
-                        title: '旅行方式',
+                        title: '旅行方式 ✈️🗺️',
                         options: ["自由行", "跟团游", "热门景点", "小众探索", "美食之旅", "自然风光"]
-                    }
-                ]
-            },
-            {
-                group: "穿搭",
-                categories: [
-                    {
-                        title: '穿搭风格',
-                        options: ["职场装", "休闲装", "运动装", "潮流装", "复古风", "简约风"]
-                    }
-                ]
-            },
-            {
-                group: "科技",
-                categories: [
-                    {
-                        title: '科技好物',
-                        options: ["手机", "笔记本", "智能穿戴", "影音设备", "耳机", "智能家居"]
-                    }
-                ]
-            },
-            {
-                group: "餐饮场所",
-                categories: [
-                    {
-                        title: '晚餐餐厅',
-                        options: ["西餐厅", "小吃店", "网红店", "家庭餐馆", "江景餐厅", "烧烤摊"]
                     }
                 ]
             }
@@ -293,7 +279,7 @@
             document.getElementById('categoryListContainer').style.display = 'none';
             document.getElementById('detailContainer').style.display = 'block';
 
-            // Set category title
+            // Set category title with emoji
             document.getElementById('categoryTitle').innerText = category.title;
 
             // Load options
@@ -312,17 +298,17 @@
 
             const singleRollButton = document.createElement('button');
             singleRollButton.className = 'dice-button';
-            singleRollButton.innerText = '单抽';
+            singleRollButton.innerText = '单抽 🎲';
             singleRollButton.onclick = () => rollDice(singleRollButton, tenRollsButton, uniqueRollButton);
 
             const tenRollsButton = document.createElement('button');
             tenRollsButton.className = 'dice-button';
-            tenRollsButton.innerText = '十连抽';
+            tenRollsButton.innerText = '十连抽 🔁';
             tenRollsButton.onclick = () => rollDiceMultiple(10, singleRollButton, tenRollsButton, uniqueRollButton);
 
             const uniqueRollButton = document.createElement('button');
             uniqueRollButton.className = 'dice-button';
-            uniqueRollButton.innerText = '唯一抽';
+            uniqueRollButton.innerText = '唯一抽 🎟️';
             uniqueRollButton.onclick = () => rollDiceUnique(singleRollButton, tenRollsButton, uniqueRollButton);
 
             buttonsContainer.appendChild(singleRollButton);
