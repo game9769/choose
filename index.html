@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蕾蕾的智能选择助手</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fde4ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            width: 95%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+        }
+        h1 {
+            text-align: center;
+            color: #ff69b4;
+            margin-bottom: 20px;
+        }
+        .category-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .category-group-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #ff69b4;
+            text-align: left;
+        }
+        .category-item {
+            background-color: #ffe4e1;
+            padding: 12px 16px;
+            border: 1px solid #ffb6c1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+        .category-item:hover {
+            background-color: #ffc0cb;
+        }
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .option {
+            background-color: #ffe4e1;
+            padding: 12px 16px;
+            border: 1px solid #ffb6c1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+            flex-basis: calc(33.33% - 10px); /* Three options per row */
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .option:hover {
+            background-color: #ffc0cb;
+            border-color: #ff1493;
+        }
+        .buttons-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .dice-button {
+            background-color: #ff69b4;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            color: white;
+            transition: background-color 0.3s;
+            flex: 1 1 calc(33.33% - 10px);
+            margin: 5px;
+        }
+        .dice-button.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .dice-button.disabled:hover {
+            background-color: #ccc;
+        }
+        .selected-option {
+            font-weight: bold;
+            color: #ff69b4;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .result-container {
+            margin-top: 10px;
+        }
+        .result-item {
+            margin: 5px 0;
+            padding: 10px;
+            border-left: 4px solid #ff69b4;
+            border-radius: 8px;
+            background-color: #ffe4e1;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .result-item.unique {
+            border-left-color: #ff1493;
+            background-color: #fff0f5;
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: transparent;
+            border: none;
+            color: #ff69b4;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            .option {
+                flex-basis: calc(50% - 10px); /* Two options per row on smaller screens */
+            }
+            .dice-button {
+                flex: 1 1 calc(50% - 10px);
+            }
+        }
+        @media (max-width: 400px) {
+            .option {
+                flex-basis: 100%; /* One option per row on very small screens */
+            }
+            .dice-button {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container" id="categoryListContainer">
+            <h1>蕾蕾的智能选择助手</h1>
+            <ul class="category-list" id="categoryList"></ul>
+        </div>
+
+        <div class="container" id="detailContainer" style="display: none;">
+            <button class="back-button" onclick="goBack()">返回</button>
+            <h1 id="categoryTitle"></h1>
+            <div class="options-container" id="optionsContainer"></div>
+            <div class="buttons-container" id="buttonsContainer"></div>
+            <div class="selected-option" id="selectedOptionDisplay"></div>
+            <div class="result-container" id="resultContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const categoriesData = [
+            {
+                group: "饮食",
+                categories: [
+                    {
+                        title: '早餐选啥',
+                        options: ["中式早餐", "西式早餐", "健康轻食", "快餐便饭", "营养全餐", "地方特色"]
+                    },
+                    {
+                        title: '零食吃啥',
+                        options: ["薯片饼干", "巧克力糖", "坚果果干", "冰淇淋", "酸奶", "辣条豆干"]
+                    },
+                    {
+                        title: '午餐安排',
+                        options: ["外卖", "便当", "食堂", "聚餐", "轻食", "快餐"]
+                    },
+                    {
+                        title: '晚餐外出',
+                        options: ["家常菜", "火锅", "异国料理", "夜市小吃", "轻食", "特色餐厅"]
+                    }
+                ]
+            },
+            {
+                group: "娱乐",
+                categories: [
+                    {
+                        title: '晚上干啥',
+                        options: ["看电影", "追剧", "玩游戏", "听音乐", "聚会", "夜游"]
+                    },
+                    {
+                        title: '兴趣爱好',
+                        options: ["涂鸦", "摄影", "手工艺", "乐器", "阅读", "户外"]
+                    }
+                ]
+            },
+            {
+                group: "生活方式",
+                categories: [
+                    {
+                        title: '起床模式',
+                        options: ["立刻起床", "再睡10分钟", "多睡半小时", "周末赖床", "智能唤醒", "自然醒"]
+                    },
+                    {
+                        title: '工作生活',
+                        options: ["高效工作", "周末放松", "健身", "兴趣", "家庭", "独处"]
+                    },
+                    {
+                        title: '学习休息',
+                        options: ["图书馆", "在线课", "晨读", "兴趣班", "睡前书", "适当休息"]
+                    }
+                ]
+            },
+            {
+                group: "购物",
+                categories: [
+                    {
+                        title: '购物选啥',
+                        options: ["服饰", "家居", "科技", "美妆", "运动", "儿童"]
+                    }
+                ]
+            },
+            {
+                group: "旅行",
+                categories: [
+                    {
+                        title: '旅行方式',
+                        options: ["自由行", "跟团游", "热门景点", "小众探索", "美食之旅", "自然风光"]
+                    }
+                ]
+            },
+            {
+                group: "穿搭",
+                categories: [
+                    {
+                        title: '穿搭风格',
+                        options: ["职场装", "休闲装", "运动装", "潮流装", "复古风", "简约风"]
+                    }
+                ]
+            },
+            {
+                group: "科技",
+                categories: [
+                    {
+                        title: '科技好物',
+                        options: ["手机", "笔记本", "智能穿戴", "影音设备", "耳机", "智能家居"]
+                    }
+                ]
+            },
+            {
+                group: "餐饮场所",
+                categories: [
+                    {
+                        title: '晚餐餐厅',
+                        options: ["西餐厅", "小吃店", "网红店", "家庭餐馆", "江景餐厅", "烧烤摊"]
+                    }
+                ]
+            }
+        ];
+
+        function loadCategoryList() {
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = ''; // Clear previous content
+
+            categoriesData.forEach(group => {
+                const groupTitle = document.createElement('div');
+                groupTitle.className = 'category-group-title';
+                groupTitle.innerText = group.group;
+                categoryList.appendChild(groupTitle);
+
+                group.categories.forEach(category => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'category-item';
+                    listItem.innerText = category.title;
+                    listItem.onclick = () => showCategoryDetails(category);
+                    categoryList.appendChild(listItem);
+                });
+            });
+        }
+
+        function showCategoryDetails(category) {
+            // Hide category list container and show detail container
+            document.getElementById('categoryListContainer').style.display = 'none';
+            document.getElementById('detailContainer').style.display = 'block';
+
+            // Set category title
+            document.getElementById('categoryTitle').innerText = category.title;
+
+            // Load options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            category.options.forEach(optionText => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerText = optionText;
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            // Create buttons
+            const buttonsContainer = document.getElementById('buttonsContainer');
+            buttonsContainer.innerHTML = '';
+
+            const singleRollButton = document.createElement('button');
+            singleRollButton.className = 'dice-button';
+            singleRollButton.innerText = '单抽';
+            singleRollButton.onclick = () => rollDice(singleRollButton, tenRollsButton, uniqueRollButton);
+
+            const tenRollsButton = document.createElement('button');
+            tenRollsButton.className = 'dice-button';
+            tenRollsButton.innerText = '十连抽';
+            tenRollsButton.onclick = () => rollDiceMultiple(10, singleRollButton, tenRollsButton, uniqueRollButton);
+
+            const uniqueRollButton = document.createElement('button');
+            uniqueRollButton.className = 'dice-button';
+            uniqueRollButton.innerText = '唯一抽';
+            uniqueRollButton.onclick = () => rollDiceUnique(singleRollButton, tenRollsButton, uniqueRollButton);
+
+            buttonsContainer.appendChild(singleRollButton);
+            buttonsContainer.appendChild(tenRollsButton);
+            buttonsContainer.appendChild(uniqueRollButton);
+
+            // Reset flags for unique roll
+            window['uniqueRollDone'] = false;
+
+            // Enable all buttons initially
+            singleRollButton.classList.remove('disabled');
+            singleRollButton.disabled = false;
+            tenRollsButton.classList.remove('disabled');
+            tenRollsButton.disabled = false;
+            uniqueRollButton.classList.remove('disabled');
+            uniqueRollButton.disabled = false;
+
+            // Clear previous selections and results
+            document.getElementById('selectedOptionDisplay').innerText = '';
+            document.getElementById('resultContainer').innerHTML = '';
+        }
+
+        function goBack() {
+            // Show category list container and hide detail container
+            document.getElementById('categoryListContainer').style.display = 'block';
+            document.getElementById('detailContainer').style.display = 'none';
+        }
+
+        function rollDice(singleRollButton, tenRollsButton, uniqueRollButton) {
+            const optionsContainer = document.getElementById('optionsContainer');
+            const options = Array.from(optionsContainer.getElementsByClassName('option'));
+            if (options.length === 0) return;
+
+            const randomIndex = Math.floor(Math.random() * options.length);
+            const selectedOption = options[randomIndex].innerText;
+
+            // Clear previous selections
+            options.forEach(option => option.classList.remove('selected-option'));
+
+            // Highlight the selected option
+            options[randomIndex].classList.add('selected-option');
+
+            // Display the selected option below the buttons container
+            const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
+            selectedOptionDisplay.innerText = `你选择了: ${selectedOption}`;
+
+            // Clear result container
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+        }
+
+        function rollDiceMultiple(count, singleRollButton, tenRollsButton, uniqueRollButton) {
+            const optionsContainer = document.getElementById('optionsContainer');
+            const options = Array.from(optionsContainer.getElementsByClassName('option'));
+            if (options.length === 0) return;
+
+            let results = {};
+            for (let i = 0; i < count && Object.keys(results).length < options.length; i++) {
+                const randomIndex = Math.floor(Math.random() * options.length);
+                const selectedOption = options[randomIndex].innerText;
+                if (!results[selectedOption]) {
+                    results[selectedOption] = 0;
+                }
+                results[selectedOption]++;
+            }
+
+            // Sort results by count in descending order
+            const sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]);
+
+            // Display the results below the buttons container
+            const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
+            selectedOptionDisplay.innerText = '';
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+            sortedResults.forEach(([option, count]) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerText = `${option} (${count})`;
+                resultContainer.appendChild(resultItem);
+            });
+        }
+
+        function rollDiceUnique(singleRollButton, tenRollsButton, uniqueRollButton) {
+            if (window['uniqueRollDone']) return;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            const options = Array.from(optionsContainer.getElementsByClassName('option'));
+            if (options.length === 0) return;
+
+            const randomIndex = Math.floor(Math.random() * options.length);
+            const selectedOption = options[randomIndex].innerText;
+
+            // Clear previous selections
+            options.forEach(option => option.classList.remove('selected-option'));
+
+            // Highlight the selected option
+            options[randomIndex].classList.add('selected-option');
+
+            // Display the selected option below the buttons container
+            const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
+            selectedOptionDisplay.innerText = `你选择了: ${selectedOption}`;
+
+            // Set flag to prevent further unique rolls
+            window['uniqueRollDone'] = true;
+
+            // Disable other buttons
+            singleRollButton.classList.add('disabled');
+            singleRollButton.disabled = true;
+            tenRollsButton.classList.add('disabled');
+            tenRollsButton.disabled = true;
+            uniqueRollButton.classList.add('disabled');
+            uniqueRollButton.disabled = true;
+
+            // Display the result with a unique style
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item unique';
+            resultItem.innerText = `唯一选择: ${selectedOption}`;
+            resultContainer.appendChild(resultItem);
+        }
+
+        // Load categories when the page loads
+        window.onload = () => {
+            loadCategoryList();
+        };
+    </script>
+</body>
+</html>
+
+
+
