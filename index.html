@@ -15,6 +15,7 @@
             align-items: center;
             min-height: 100vh;
             color: #333;
+            touch-action: manipulation; /* Improve touch performance */
         }
         .container {
             max-width: 600px;
@@ -55,7 +56,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .category-item:hover {
+        .category-item:hover,
+        .category-item:active {
             transform: scale(1.05);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
@@ -79,7 +81,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .option:hover {
+        .option:hover,
+        .option:active {
             transform: scale(1.05);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
             border-color: #ff1493;
@@ -106,7 +109,8 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
-        .dice-button.disabled:hover {
+        .dice-button.disabled:hover,
+        .dice-button.disabled:active {
             background-color: #ccc;
             transform: none;
         }
@@ -143,7 +147,8 @@
             cursor: pointer;
             transition: color 0.3s;
         }
-        .back-button:hover {
+        .back-button:hover,
+        .back-button:active {
             color: #ff1493;
         }
         @media (max-width: 600px) {
@@ -179,12 +184,12 @@
 <body>
     <div id="app">
         <div class="container" id="categoryListContainer">
-            <h1>😊 蕾蕾选择器 💕</h1>
+            <h1>😊蕾蕾选择器💕</h1>
             <ul class="category-list" id="categoryList"></ul>
         </div>
 
         <div class="container" id="detailContainer" style="display: none;">
-            <button class="back-button" onclick="goBack()">返回 🔄</button>
+            <button class="back-button" id="backButton">返回 🔄</button>
             <h1 id="categoryTitle"></h1>
             <div class="options-container" id="optionsContainer"></div>
             <div class="buttons-container" id="buttonsContainer"></div>
@@ -194,243 +199,302 @@
     </div>
 
     <script>
-        const categoriesData = [
-            {
-                group: "生活方式",
-                categories: [
-                    {
-                        title: '起床模式 🕒⏰',
-                        options: ["立刻起床", "再睡10分钟", "多睡半小时", "多睡1小时", "自然醒"]
-                    }
-                ]
-            },
-            {
-                group: "饮食",
-                categories: [
-                    {
-                        title: '早餐 🍳🥐',
-                        options: ["中式早餐", "西式早餐", "健康轻食", "快餐便饭", "营养全餐", "地方特色"]
-                    },
-                    {
-                        title: '午餐 🍽️🥗',
-                        options: ["外卖", "便当", "食堂", "聚餐", "轻食", "快餐"]
-                    },
-                    {
-                        title: '零食 🍪🍫',
-                        options: ["水果", "薯片饼干", "巧克力糖", "坚果果干", "冰淇淋", "酸奶", "蛋糕", "辣条豆干"]
-                    },
-                    {
-                        title: '晚餐 🍽️🍲',
-                        options: ["外卖", "家常菜", "火锅", "异国料理", "夜市小吃", "轻食", "特色餐厅"]
-                    },
-                    {
-                        title: '晚餐餐厅 🍽️🏠',
-                        options: ["西餐厅", "小吃店", "网红店", "家庭餐馆", "江景餐厅", "烧烤摊"]
-                    }
-                ]
-            },
-            {
-                group: "娱乐",
-                categories: [
-                    {
-                        title: '晚上干嘛 🎥🍿',
-                        options: ["运动", "锻炼", "看电影", "追剧", "玩游戏", "听音乐", "追小说", "夜游"]
-                    },
-                ]
-            },
-            {
-                group: "旅行",
-                categories: [
-                    {
-                        title: '旅行方式 ✈️🗺️',
-                        options: ["自由行", "跟团游", "热门景点", "小众探索", "美食之旅", "自然风光"]
-                    }
-                ]
-            }
-        ];
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOMContentLoaded event fired");
 
-        function loadCategoryList() {
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = ''; // Clear previous content
+            const categoriesData = [
+                {
+                    group: "生活方式",
+                    categories: [
+                        {
+                            title: '起床模式 🕒⏰',
+                            options: ["立刻起床", "再睡10分钟", "多睡半小时", "多睡1小时", "自然醒"]
+                        }
+                    ]
+                },
+                {
+                    group: "饮食",
+                    categories: [
+                        {
+                            title: '早餐 🍳🥐',
+                            options: ["中式早餐", "西式早餐", "健康轻食", "快餐便饭", "营养全餐", "地方特色"]
+                        },
+                        {
+                            title: '午餐 🍽️🥗',
+                            options: ["外卖", "便当", "食堂", "聚餐", "轻食", "快餐"]
+                        },
+                        {
+                            title: '零食 🍪🍫',
+                            options: ["水果", "薯片饼干", "巧克力糖", "坚果果干", "冰淇淋", "酸奶", "蛋糕", "辣条豆干"]
+                        },
+                        {
+                            title: '晚餐 🍽️🍲',
+                            options: ["外卖", "家常菜", "火锅", "异国料理", "夜市小吃", "轻食", "特色餐厅"]
+                        },
+                        {
+                            title: '晚餐餐厅 🍽️🏠',
+                            options: ["西餐厅", "小吃店", "网红店", "家庭餐馆", "江景餐厅", "烧烤摊"]
+                        }
+                    ]
+                },
+                {
+                    group: "娱乐",
+                    categories: [
+                        {
+                            title: '晚上干嘛 🎥🍿',
+                            options: ["运动", "锻炼", "看电影", "追剧", "玩游戏", "听音乐", "追小说", "夜游"]
+                        },
+                    ]
+                },
+                {
+                    group: "旅行",
+                    categories: [
+                        {
+                            title: '旅行方式 ✈️🗺️',
+                            options: ["自由行", "跟团游", "热门景点", "小众探索", "美食之旅", "自然风光"]
+                        }
+                    ]
+                }
+            ];
 
-            categoriesData.forEach(group => {
-                const groupTitle = document.createElement('div');
-                groupTitle.className = 'category-group-title';
-                groupTitle.innerText = group.group;
-                categoryList.appendChild(groupTitle);
+            function loadCategoryList() {
+                console.log("Loading category list");
+                const categoryList = document.getElementById('categoryList');
+                if (!categoryList) {
+                    console.error("Element with ID 'categoryList' not found");
+                    return;
+                }
 
-                group.categories.forEach(category => {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'category-item';
-                    listItem.innerText = category.title;
-                    listItem.onclick = () => showCategoryDetails(category);
-                    categoryList.appendChild(listItem);
+                categoryList.innerHTML = ''; // Clear previous content
+
+                categoriesData.forEach(group => {
+                    const groupTitle = document.createElement('div');
+                    groupTitle.className = 'category-group-title';
+                    groupTitle.innerText = group.group;
+                    categoryList.appendChild(groupTitle);
+
+                    group.categories.forEach(category => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'category-item';
+                        listItem.innerText = category.title;
+                        listItem.onclick = () => showCategoryDetails(category);
+                        categoryList.appendChild(listItem);
+                    });
                 });
-            });
-        }
+            }
 
-        function showCategoryDetails(category) {
-            // Hide category list container and show detail container
-            document.getElementById('categoryListContainer').style.display = 'none';
-            document.getElementById('detailContainer').style.display = 'block';
+            function showCategoryDetails(category) {
+                console.log("Showing category details for:", category.title);
+                // Hide category list container and show detail container
+                const categoryListContainer = document.getElementById('categoryListContainer');
+                const detailContainer = document.getElementById('detailContainer');
+                if (!categoryListContainer || !detailContainer) {
+                    console.error("Elements with IDs 'categoryListContainer' or 'detailContainer' not found");
+                    return;
+                }
 
-            // Set category title with emoji
-            document.getElementById('categoryTitle').innerText = category.title;
+                categoryListContainer.style.display = 'none';
+                detailContainer.style.display = 'block';
 
-            // Load options
-            const optionsContainer = document.getElementById('optionsContainer');
-            optionsContainer.innerHTML = '';
-            category.options.forEach(optionText => {
-                const optionDiv = document.createElement('div');
-                optionDiv.className = 'option';
-                optionDiv.innerText = optionText;
-                optionsContainer.appendChild(optionDiv);
-            });
+                // Set category title with emoji
+                const categoryTitle = document.getElementById('categoryTitle');
+                if (categoryTitle) categoryTitle.innerText = category.title;
 
-            // Create buttons
-            const buttonsContainer = document.getElementById('buttonsContainer');
-            buttonsContainer.innerHTML = '';
+                // Load options
+                const optionsContainer = document.getElementById('optionsContainer');
+                if (!optionsContainer) {
+                    console.error("Element with ID 'optionsContainer' not found");
+                    return;
+                }
 
-            const singleRollButton = document.createElement('button');
-            singleRollButton.className = 'dice-button';
-            singleRollButton.innerText = '单抽 🎲';
-            singleRollButton.onclick = () => rollDice(singleRollButton, tenRollsButton, uniqueRollButton);
+                optionsContainer.innerHTML = '';
+                category.options.forEach(optionText => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.innerText = optionText;
+                    optionsContainer.appendChild(optionDiv);
+                });
 
-            const tenRollsButton = document.createElement('button');
-            tenRollsButton.className = 'dice-button';
-            tenRollsButton.innerText = '十连抽 🔁';
-            tenRollsButton.onclick = () => rollDiceMultiple(10, singleRollButton, tenRollsButton, uniqueRollButton);
+                // Create buttons
+                const buttonsContainer = document.getElementById('buttonsContainer');
+                if (!buttonsContainer) {
+                    console.error("Element with ID 'buttonsContainer' not found");
+                    return;
+                }
 
-            const uniqueRollButton = document.createElement('button');
-            uniqueRollButton.className = 'dice-button';
-            uniqueRollButton.innerText = '唯一抽 🎟️';
-            uniqueRollButton.onclick = () => rollDiceUnique(singleRollButton, tenRollsButton, uniqueRollButton);
+                buttonsContainer.innerHTML = '';
 
-            buttonsContainer.appendChild(singleRollButton);
-            buttonsContainer.appendChild(tenRollsButton);
-            buttonsContainer.appendChild(uniqueRollButton);
+                const singleRollButton = document.createElement('button');
+                singleRollButton.className = 'dice-button';
+                singleRollButton.innerText = '单抽 🎲';
+                singleRollButton.onclick = () => rollDice(singleRollButton, tenRollsButton, uniqueRollButton);
 
-            // Reset flags for unique roll
-            window['uniqueRollDone'] = false;
+                const tenRollsButton = document.createElement('button');
+                tenRollsButton.className = 'dice-button';
+                tenRollsButton.innerText = '十连抽 🔁';
+                tenRollsButton.onclick = () => rollDiceMultiple(10, singleRollButton, tenRollsButton, uniqueRollButton);
 
-            // Enable all buttons initially
-            singleRollButton.classList.remove('disabled');
-            singleRollButton.disabled = false;
-            tenRollsButton.classList.remove('disabled');
-            tenRollsButton.disabled = false;
-            uniqueRollButton.classList.remove('disabled');
-            uniqueRollButton.disabled = false;
+                const uniqueRollButton = document.createElement('button');
+                uniqueRollButton.className = 'dice-button';
+                uniqueRollButton.innerText = '唯一抽 🎟️';
+                uniqueRollButton.onclick = () => rollDiceUnique(singleRollButton, tenRollsButton, uniqueRollButton);
 
-            // Clear previous selections and results
-            document.getElementById('selectedOptionDisplay').innerText = '';
-            document.getElementById('resultContainer').innerHTML = '';
-        }
+                buttonsContainer.appendChild(singleRollButton);
+                buttonsContainer.appendChild(tenRollsButton);
+                buttonsContainer.appendChild(uniqueRollButton);
 
-        function goBack() {
-            // Show category list container and hide detail container
-            document.getElementById('categoryListContainer').style.display = 'block';
-            document.getElementById('detailContainer').style.display = 'none';
-        }
+                // Reset flags for unique roll
+                window['uniqueRollDone'] = false;
 
-        function rollDice(singleRollButton, tenRollsButton, uniqueRollButton) {
-            const optionsContainer = document.getElementById('optionsContainer');
-            const options = Array.from(optionsContainer.getElementsByClassName('option'));
-            if (options.length === 0) return;
+                // Enable all buttons initially
+                singleRollButton.classList.remove('disabled');
+                singleRollButton.disabled = false;
+                tenRollsButton.classList.remove('disabled');
+                tenRollsButton.disabled = false;
+                uniqueRollButton.classList.remove('disabled');
+                uniqueRollButton.disabled = false;
 
-            const randomIndex = Math.floor(Math.random() * options.length);
-            const selectedOption = options[randomIndex].innerText;
+                // Clear previous selections and results
+                const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
+                if (selectedOptionDisplay) selectedOptionDisplay.innerText = '';
 
-            // Clear previous selections
-            options.forEach(option => option.classList.remove('selected-option'));
+                const resultContainer = document.getElementById('resultContainer');
+                if (resultContainer) resultContainer.innerHTML = '';
+            }
 
-            // Highlight the selected option
-            options[randomIndex].classList.add('selected-option');
+            function goBack() {
+                console.log("Going back to category list");
+                // Show category list container and hide detail container
+                const categoryListContainer = document.getElementById('categoryListContainer');
+                const detailContainer = document.getElementById('detailContainer');
+                if (!categoryListContainer || !detailContainer) {
+                    console.error("Elements with IDs 'categoryListContainer' or 'detailContainer' not found");
+                    return;
+                }
 
-            // Display the selected option below the buttons container
-            const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
-            selectedOptionDisplay.innerText = `你选择了: ${selectedOption}`;
+                categoryListContainer.style.display = 'block';
+                detailContainer.style.display = 'none';
+            }
 
-            // Clear result container
-            const resultContainer = document.getElementById('resultContainer');
-            resultContainer.innerHTML = '';
-        }
+            function rollDice(singleRollButton, tenRollsButton, uniqueRollButton) {
+                console.log("Rolling dice once");
+                const optionsContainer = document.getElementById('optionsContainer');
+                const options = Array.from(optionsContainer.getElementsByClassName('option'));
+                if (options.length === 0) {
+                    console.error("No options found in 'optionsContainer'");
+                    return;
+                }
 
-        function rollDiceMultiple(count, singleRollButton, tenRollsButton, uniqueRollButton) {
-            const optionsContainer = document.getElementById('optionsContainer');
-            const options = Array.from(optionsContainer.getElementsByClassName('option'));
-            if (options.length === 0) return;
-
-            let results = {};
-            for (let i = 0; i < count && Object.keys(results).length < options.length; i++) {
                 const randomIndex = Math.floor(Math.random() * options.length);
                 const selectedOption = options[randomIndex].innerText;
-                if (!results[selectedOption]) {
-                    results[selectedOption] = 0;
-                }
-                results[selectedOption]++;
+
+                // Clear previous selections
+                options.forEach(option => option.classList.remove('selected-option'));
+
+                // Highlight the selected option
+                options[randomIndex].classList.add('selected-option');
+
+                // Display the selected option below the buttons container
+                const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
+                if (selectedOptionDisplay) selectedOptionDisplay.innerText = `你选择了: ${selectedOption}`;
+
+                // Clear result container
+                const resultContainer = document.getElementById('resultContainer');
+                if (resultContainer) resultContainer.innerHTML = '';
             }
 
-            // Sort results by count in descending order
-            const sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]);
+            function rollDiceMultiple(count, singleRollButton, tenRollsButton, uniqueRollButton) {
+                console.log(`Rolling dice ${count} times`);
+                const optionsContainer = document.getElementById('optionsContainer');
+                const options = Array.from(optionsContainer.getElementsByClassName('option'));
+                if (options.length === 0) {
+                    console.error("No options found in 'optionsContainer'");
+                    return;
+                }
 
-            // Display the results below the buttons container
-            const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
-            selectedOptionDisplay.innerText = '';
+                let results = {};
+                for (let i = 0; i < count && Object.keys(results).length < options.length; i++) {
+                    const randomIndex = Math.floor(Math.random() * options.length);
+                    const selectedOption = options[randomIndex].innerText;
+                    if (!results[selectedOption]) {
+                        results[selectedOption] = 0;
+                    }
+                    results[selectedOption]++;
+                }
 
-            const resultContainer = document.getElementById('resultContainer');
-            resultContainer.innerHTML = '';
-            sortedResults.forEach(([option, count]) => {
+                // Sort results by count in descending order
+                const sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]);
+
+                // Display the results below the buttons container
+                const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
+                if (selectedOptionDisplay) selectedOptionDisplay.innerText = '';
+
+                const resultContainer = document.getElementById('resultContainer');
+                if (resultContainer) resultContainer.innerHTML = '';
+                sortedResults.forEach(([option, count]) => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    resultItem.innerText = `${option} (${count})`;
+                    resultContainer.appendChild(resultItem);
+                });
+            }
+
+            function rollDiceUnique(singleRollButton, tenRollsButton, uniqueRollButton) {
+                console.log("Rolling dice uniquely");
+                if (window['uniqueRollDone']) {
+                    console.warn("Unique roll already done");
+                    return;
+                }
+
+                const optionsContainer = document.getElementById('optionsContainer');
+                const options = Array.from(optionsContainer.getElementsByClassName('option'));
+                if (options.length === 0) {
+                    console.error("No options found in 'optionsContainer'");
+                    return;
+                }
+
+                const randomIndex = Math.floor(Math.random() * options.length);
+                const selectedOption = options[randomIndex].innerText;
+
+                // Clear previous selections
+                options.forEach(option => option.classList.remove('selected-option'));
+
+                // Highlight the selected option
+                options[randomIndex].classList.add('selected-option');
+
+                // Display the selected option below the buttons container
+                const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
+                if (selectedOptionDisplay) selectedOptionDisplay.innerText = `你选择了: ${selectedOption}`;
+
+                // Set flag to prevent further unique rolls
+                window['uniqueRollDone'] = true;
+
+                // Disable other buttons
+                singleRollButton.classList.add('disabled');
+                singleRollButton.disabled = true;
+                tenRollsButton.classList.add('disabled');
+                tenRollsButton.disabled = true;
+                uniqueRollButton.classList.add('disabled');
+                uniqueRollButton.disabled = true;
+
+                // Display the result with a unique style
+                const resultContainer = document.getElementById('resultContainer');
+                if (resultContainer) resultContainer.innerHTML = '';
                 const resultItem = document.createElement('div');
-                resultItem.className = 'result-item';
-                resultItem.innerText = `${option} (${count})`;
+                resultItem.className = 'result-item unique';
+                resultItem.innerText = `唯一选择: ${selectedOption}`;
                 resultContainer.appendChild(resultItem);
-            });
-        }
+            }
 
-        function rollDiceUnique(singleRollButton, tenRollsButton, uniqueRollButton) {
-            if (window['uniqueRollDone']) return;
+            // Bind goBack function to the back button
+            const backButton = document.getElementById('backButton');
+            if (backButton) {
+                backButton.onclick = goBack;
+            }
 
-            const optionsContainer = document.getElementById('optionsContainer');
-            const options = Array.from(optionsContainer.getElementsByClassName('option'));
-            if (options.length === 0) return;
-
-            const randomIndex = Math.floor(Math.random() * options.length);
-            const selectedOption = options[randomIndex].innerText;
-
-            // Clear previous selections
-            options.forEach(option => option.classList.remove('selected-option'));
-
-            // Highlight the selected option
-            options[randomIndex].classList.add('selected-option');
-
-            // Display the selected option below the buttons container
-            const selectedOptionDisplay = document.getElementById('selectedOptionDisplay');
-            selectedOptionDisplay.innerText = `你选择了: ${selectedOption}`;
-
-            // Set flag to prevent further unique rolls
-            window['uniqueRollDone'] = true;
-
-            // Disable other buttons
-            singleRollButton.classList.add('disabled');
-            singleRollButton.disabled = true;
-            tenRollsButton.classList.add('disabled');
-            tenRollsButton.disabled = true;
-            uniqueRollButton.classList.add('disabled');
-            uniqueRollButton.disabled = true;
-
-            // Display the result with a unique style
-            const resultContainer = document.getElementById('resultContainer');
-            resultContainer.innerHTML = '';
-            const resultItem = document.createElement('div');
-            resultItem.className = 'result-item unique';
-            resultItem.innerText = `唯一选择: ${selectedOption}`;
-            resultContainer.appendChild(resultItem);
-        }
-
-        // Load categories when the page loads
-        window.onload = () => {
+            // Load categories when the DOM is fully loaded
             loadCategoryList();
-        };
+        });
     </script>
 </body>
 </html>
